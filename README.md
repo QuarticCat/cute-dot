@@ -8,7 +8,7 @@
 
 - Configuration based (like [dotter](https://github.com/SuperCuber/dotter))
 
-- Intuitive and easy-to-use DSL
+- Intuitive and easy-to-use eDSL, powered by zsh
 
 - [GNU Stow](https://www.gnu.org/software/stow/)-like file structure
 
@@ -50,6 +50,18 @@ Open `cute-dot.zsh`, you can see a config area enclosed by comments at the end o
 
 An example is [my dotfiles](https://github.com/QuarticCat/dotfiles).
 
+Remember that you are directly writing a zsh script, you can do many things in it. For example, you can write an OS-dependent config by
+
+```zsh
+if [[ $OSTYPE == linux-gnu* ]] {
+    # ...
+} elif [[ $OSTYPE == darwin* ]] {
+    # ...
+} else {
+    # ...
+}
+```
+
 ## Usage
 
 You can call this script from any path. It does not depend on the working directory.
@@ -78,7 +90,7 @@ $ ./cute-dot.zsh apply [--all | <profile-name>...]
 
 ## Extend It As You Like
 
-It might be too simple to meet your needs. However, considering that it is so tiny, everyone learned zsh can easily extend it. Here are some examples.
+It might be too simple to meet your needs. However, considering that it is so tiny, everyone learned zsh can easily extend it. This is what I expect it to be -- a start of your own dotfile manager. Here are some examples.
 
 ### Configure options from outside
 
@@ -95,13 +107,26 @@ Then you can change `rsync_opt` from command line like
 RSYNC_OPT='-nri' ./cute-dot.zsh sync --all
 ```
 
+### Separate config to another file
+
+Change the script as
+
+```diff
+- # ----- Config Begin -----
+- # ...
+- # ------ Config End ------
++ source $DOT_DIR/cute-dot-config.zsh
+```
+
+Then you can write your config in `cute-dot-config.zsh`.
+
 ### Integrate GPG to encrypt files
 
 Change the script as
 
 ```diff
 + declare -A enc_map  # <pf-name> : <pat>
-+
+
 + _add-enc() {  # <pf-name> <pat>
 +     local name=${1%.enc}
 +     enc_map[$name]=$2
@@ -141,14 +166,14 @@ Change the script as
 + gpg_rcpt='QuarticCat'  # gpg recipient
 ```
 
-Then you can configure files needed to be encrypted like
+Then you can configure the files needed to be encrypted like
 
 ```zsh
 zsh.pf ~/.config/zsh '.zshrc *.zsh (^.*)/(^*.zwc)'
-zsh.env 'snippets-private/*'
+zsh.enc 'snippets-private/*'
 ```
 
-Similarly, you can implement `<pf-name>.symlink`, `<pf-name>.template` or whatever by yourself. But for encryption, I recommend you to use [git-crypt](https://github.com/AGWA/git-crypt).
+Similarly, you can implement `<pf-name>.symlink`, `<pf-name>.template` or whatever. But for encryption, I recommend you to use [git-crypt](https://github.com/AGWA/git-crypt).
 
 ## License
 
