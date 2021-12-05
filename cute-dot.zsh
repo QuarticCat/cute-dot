@@ -48,7 +48,7 @@ _for-each-pf() {  # <func> [--all | <pf-name>...]
     if [[ $1 == --all ]] {
         for i in ${(k)pf_map}; $func $i
     } else {
-        for i in ${(u)@}; [[ -v pf_map[$i] ]] && $func $i
+        for i in ${(u)@}; $func $i
     }
 }
 

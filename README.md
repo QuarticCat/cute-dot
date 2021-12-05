@@ -120,7 +120,34 @@ Change the script as
 
 Then you can write your config in `cute-dot-config.zsh`.
 
-### Integrate GPG to encrypt files
+### Use GNU Parallel to process profiles in parallel
+
+Change the script as
+
+```diff
+  _rsync-pat() {  # <src> <dst> <pat>
++     setopt null_glob extended_glob no_bare_glob_qual
+      cd $1 &>/dev/null &&
+      rsync $=rsync_opt -R $~=3 $2/
+  }
+
++ source $(which env_parallel.zsh)
+
+  _for-each-pf() {  # <func> [--all | <pf-name>...]
+      local func=$1; shift
+      if [[ $1 == --all ]] {
+-         for i in ${(k)pf_map}; $func $i
++         env_parallel $func ::: ${(k)pf_map}
+      } else {
+-         for i in ${(u)@}; $func $i
++         env_parallel $func ::: ${(u)@}
+      }
+  }
+```
+
+Then you will find the execution time becomes much faster.
+
+### Use GPG to encrypt files
 
 Change the script as
 
