@@ -125,22 +125,20 @@ Then you can write your config in `cute-dot-config.zsh`.
 Change the script as
 
 ```diff
-  _rsync-pat() {  # <src> <dst> <pat>
-+     setopt null_glob extended_glob no_bare_glob_qual
-      cd $1 &>/dev/null &&
-      rsync $=rsync_opt -R $~=3 $2/
-  }
-
 + source $(which env_parallel.zsh)
+
++ _init() {
++     setopt null_glob extended_glob no_bare_glob_qual
++ }
 
   _for-each-pf() {  # <func> [--all | <pf-name>...]
       local func=$1; shift
       if [[ $1 == --all ]] {
 -         for i in ${(k)pf_map}; $func $i
-+         env_parallel $func ::: ${(k)pf_map}
++         env_parallel "_init; $func" ::: ${(k)pf_map}
       } else {
 -         for i in ${(u)@}; $func $i
-+         env_parallel $func ::: ${(u)@}
++         env_parallel "_init; $func" ::: ${(u)@}
       }
   }
 ```
@@ -148,6 +146,8 @@ Change the script as
 Then you will find the execution time becomes much faster.
 
 ### Use GPG to encrypt files
+
+This is just an example showing how to extend *Cute Dot*. For this purpose, I recommend you to use [git-crypt](https://github.com/AGWA/git-crypt), which works orthogonally with *Cute Dot*.
 
 Change the script as
 
@@ -200,7 +200,7 @@ zsh.pf ~/.config/zsh '.zshrc *.zsh (^.*)/(^*.zwc)'
 zsh.enc 'snippets-private/*'
 ```
 
-Similarly, you can implement `<pf-name>.symlink`, `<pf-name>.template` or whatever. But for encryption, I recommend you to use [git-crypt](https://github.com/AGWA/git-crypt).
+Similarly, you can implement `<pf-name>.symlink`, `<pf-name>.template` or whatever.
 
 ## License
 
