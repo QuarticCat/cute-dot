@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-setopt null_glob extended_glob no_bare_glob_qual
+setopt null_glob extended_glob
 
 CYAN='\033[0;36m'
 NC='\033[0m'  # No Color
@@ -23,23 +23,28 @@ _add-pf() {  # <pf-name> {<pf-loc> <pf-pat>}...
 alias -s pf='_add-pf'
 
 _rsync-pat() {  # <src> <dst> <pat>
-    cd $1 &>/dev/null &&
-    rsync $=rsync_opt -R $~=3 $2/
+    cd $1 && rsync $=rsync_opt --relative $~=3 $2/
 }
 
 _sync() {  # <pf-name>
     for i in $=pf_map[$1]; {
-        echo $CYAN"$1 <- ${(D)pf_loc[i]}"$NC
-        _rsync-pat $pf_loc[i] $DOT_DIR/$1 $pf_pat[i]
-        echo
+        local changes=$(_rsync-pat $pf_loc[i] $DOT_DIR/$1 $pf_pat[i])
+        if [[ $changes != '' ]] {
+            echo $CYAN"$1 <- ${(D)pf_loc[i]}"$NC
+            echo $changes
+            echo
+        }
     }
 }
 
 _apply() {  # <pf-name>
     for i in $=pf_map[$1]; {
-        echo $CYAN"$1 -> ${(D)pf_loc[i]}"$NC
-        _rsync-pat $DOT_DIR/$1 $pf_loc[i] $pf_pat[i]
-        echo
+        local changes=$(_rsync-pat $DOT_DIR/$1 $pf_loc[i] $pf_pat[i])
+        if [[ $changes != '' ]] {
+            echo $CYAN"$1 -> ${(D)pf_loc[i]}"$NC
+            echo $changes
+            echo
+        }
     }
 }
 
@@ -56,18 +61,19 @@ cute-dot-list()  { printf '%s\n' ${(ko)pf_map} }
 cute-dot-sync()  { _for-each-pf _sync $@ }
 cute-dot-apply() { _for-each-pf _apply $@ }
 
-# -------------------------------- Config Begin --------------------------------
+# =============================== Config Begin =============================== #
 
-rsync_opt='-ri'  # rsync options
+# Rsync Options
+rsync_opt='-rci --mkpath'
 
-# profile list
-
-# example:
+# Profile List
+#
+# Example:
 #
 # zsh.pf \
 #     ~ '.zshenv' \
-#     ~/.config/zsh '.zshrc *.zsh (^.*)/(^*.zwc)'
+#     ~/.config/zsh '.zshrc *.zsh */^*.zwc'
 
-# --------------------------------- Config End ---------------------------------
+# ================================ Config End ================================ #
 
 cute-dot-$1 ${@:2}

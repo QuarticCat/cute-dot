@@ -35,7 +35,7 @@ Open `cute-dot.zsh`, you can see a config area enclosed by comments at the end o
   ```zsh
   zsh.pf \
       ~ '.zshenv' \
-      ~/.config/zsh '.zshrc *.zsh (^.*)/(^*.zwc)'
+      ~/.config/zsh '.zshrc *.zsh */^*.zwc'
   ```
 
   The `<profile-pattern>` argument is a string of globs. Here is a quick test to see if the last pattern is correct:
@@ -97,14 +97,14 @@ It might be too simple to meet your needs. However, considering that it is so ti
 Change the script as
 
 ```diff
-- rsync_opt='-ri'
-+ rsync_opt=${RSYNC_OPT:-'-ri'}
+- rsync_opt=...
++ rsync_opt=${RSYNC_OPT:-'...'}
 ```
 
 Then you can change `rsync_opt` from command line like
 
 ```console
-RSYNC_OPT='-nri' ./cute-dot.zsh sync --all
+RSYNC_OPT='-nrci --mkpath' ./cute-dot.zsh sync --all
 ```
 
 ### Separate config to another file
@@ -112,9 +112,9 @@ RSYNC_OPT='-nri' ./cute-dot.zsh sync --all
 Change the script as
 
 ```diff
-- # ----- Config Begin -----
+- # ===== Config Begin =====
 - # ...
-- # ------ Config End ------
+- # ====== Config End ======
 + source $DOT_DIR/cute-dot-config.zsh
 ```
 
@@ -128,7 +128,7 @@ Change the script as
 + source $(which env_parallel.zsh)
 
 + _init() {
-+     setopt null_glob extended_glob no_bare_glob_qual
++     setopt null_glob extended_glob
 + }
 
   _for-each-pf() {  # <func> [--all | <pf-name>...]
